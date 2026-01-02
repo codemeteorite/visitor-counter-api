@@ -1,29 +1,37 @@
 import express from "express";
-import fetch from "node-fetch";
+import { BetaAnalyticsDataClient } from "@google-analytics/data";
 
 const app = express();
 
-app.get("/visitors", async (req, res) => {
-  const response = await fetch(
-    "https://analyticsdata.googleapis.com/v1beta/properties/YOUR_PROPERTY_ID:runReport",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.GA_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        metrics: [{ name: "totalUsers" }]
-      })
-    }
-  );
+// Convert JSON from Render env into credentials
+process.env.GOOGLE_APPLICATION_CREDENTIALS = JSON.stringify(
+  JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+);
 
-  const data = await response.json();
-  const count = data.rows?.[0]?.metricValues?.[0]?.value || 0;
-
-  res.json({ count });
+// Create Analytics client
+const client = new BetaAnalyticsDataClient({
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON),
 });
 
+const PROPERTY_ID = "518221140"; // <-- your GA4 property id
+
+app.get("/visitors", async (req, res) => {
+  try {
+    const [response] = await client.runReport({
+      property: `properties/${PROPERTY_ID}`,
+      metrics: [{ name: "totalUsers" }],
+      dateRanges: [{ startDate: "2000-01-01", endDate: "today" }],
+    });
+
+    const count =
+      response.rows?.[0]?.metricValues?.[0]?.value || "0";
+
+    res.json({ count });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Analytics fetch failed" });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("API running on port", PORT));
