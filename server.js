@@ -13,7 +13,7 @@ const client = new BetaAnalyticsDataClient({
   credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON),
 });
 
-const PROPERTY_ID = "518221140"; // <-- your GA4 property id
+const PROPERTY_ID = "518221140";
 
 app.get("/visitors", async (req, res) => {
   try {
@@ -23,15 +23,14 @@ app.get("/visitors", async (req, res) => {
       dateRanges: [{ startDate: "2000-01-01", endDate: "today" }],
     });
 
-    const count =
-      response.rows?.[0]?.metricValues?.[0]?.value || "0";
-
+    const count = response.rows?.[0]?.metricValues?.[0]?.value || "0";
     res.json({ count });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Analytics fetch failed" });
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("API running on port", PORT));
