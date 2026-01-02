@@ -20,7 +20,8 @@ app.get("/visitors", async (req, res) => {
     const [response] = await client.runReport({
       property: `properties/${PROPERTY_ID}`,
       metrics: [{ name: "totalUsers" }],
-      dateRanges: [{ startDate: "2000-01-01", endDate: "today" }],
+      dateRanges: [{ startDate: "2015-08-14", endDate: "today" }],
+
     });
 
     const count = response.rows?.[0]?.metricValues?.[0]?.value || "0";
