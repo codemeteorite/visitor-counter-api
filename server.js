@@ -1,7 +1,14 @@
 import express from "express";
+import cors from "cors";
 import { BetaAnalyticsDataClient } from "@google-analytics/data";
 
 const app = express();
+
+app.use(cors({
+  origin: "https://yahiya.xyz"
+}));
+
+ 
 
 // Convert JSON from Render env into credentials
 process.env.GOOGLE_APPLICATION_CREDENTIALS = JSON.stringify(
